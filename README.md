@@ -2,6 +2,10 @@
 
 ## Utilizing Aseprite for crafting pixel art images, then enhancing their quality through algorithmic refinement
 
+![image](https://github.com/Kimiko12/Postprocess_for_PixelArt_images/assets/79062452/0fa3a912-9692-4762-a62c-4ac16559eae6) ![image](https://github.com/Kimiko12/Postprocess_for_PixelArt_images/assets/79062452/0bbaa32a-6771-4daa-a763-2317fb6a800f)
+
+
+
 
 ### This README outlines the usage, installation, and functionality of a postprocessing tool designed for enhancing pixel art images. This tool encompasses a range of operations such as:
 - format conversion
