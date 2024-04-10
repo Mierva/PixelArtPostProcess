@@ -14,7 +14,7 @@ The postprocessing tool for pixel art includes a comprehensive set of features t
 
 Conversion of SVG to PNG format.
 Automatic colorization of grayscale images.
-Enhancement of image contours.
+Enhancement of image contours and choose different shades.
 Reduction of isolated pixel artifacts.
 Application of custom color palettes.
 Export of processed images to both PNG and SVG formats.
@@ -64,7 +64,7 @@ Handles image format conversions, isolating pixel changes, contour enhancements,
 
 - from_svg_to_png(): Converts SVG images to PNG.
 - change_isolating_pixels(): Modifies isolated pixels based on neighbors.
--make_contour(): Enhances contours in the image.
+- make_contour(): Enhances contours in the image.
 - remove_artifacts(): Removes unwanted artifacts from the image.
 - ImageColorizer
 - Utilizes a convolutional neural network to colorize grayscale images automatically. Key methods include:
