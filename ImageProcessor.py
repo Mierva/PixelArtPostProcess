@@ -1,6 +1,7 @@
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 import cairosvg
+from scipy import stats
 import cv2
 
 
@@ -31,9 +32,51 @@ class ImageProcessor:
             if np.abs(int(pixel) - int(neighbor)) >= threshold:
                 count += 1
         return count >= neighbors_number
+    
+    # @staticmethod
+    # def compare_pixel_with_neighbors(pixel, neighbors, threshold, neighbors_number):
+    #     count = 0
 
-    @staticmethod
-    def iterate_neighbors(img, x, y):
+    #     # Convert pixel to integer and check if conversion is successful
+    #     try:
+    #         pixel_value = int(pixel)
+    #     except ValueError:
+    #         print(f"Conversion error: Pixel value '{pixel}' is not an integer.")
+    #         return False  # Return false or handle in another appropriate way
+
+    #     for neighbor in neighbors:
+    #         # Convert neighbor to integer and check if conversion is successful
+    #         try:
+    #             neighbor_value = int(neighbor)
+    #         except ValueError:
+    #             print(f"Conversion error: Neighbor value '{neighbor}' is not an integer.")
+    #             continue  # Optionally continue to next neighbor
+
+    #         # Perform the comparison with absolute values
+    #         try:
+    #             if np.abs(pixel_value - neighbor_value) >= threshold:
+    #                 count += 1
+    #         except TypeError as e:
+    #             print(f"TypeError in comparison: {e}")
+    #             continue
+
+    #     return count >= neighbors_number
+
+
+    # @staticmethod
+    # def iterate_neighbors(img, x, y):
+    #     neighbors = []
+    #     for dy in range(-1, 2):
+    #         for dx in range(-1, 2):
+    #             if dx == 0 and dy == 0:
+    #                 continue
+    #             nx, ny = x + dx, y + dy
+    #             if 0 <= nx < img.shape[1] and 0 <= ny < img.shape[0]:
+    #                 neighbors.append(img[ny, nx])
+    #     print(f"Neighbors: {neighbors}")
+    #     return neighbors
+
+    def iterate_neighbors(self, img, x, y):
         neighbors = []
         for dy in range(-1, 2):
             for dx in range(-1, 2):
@@ -42,7 +85,17 @@ class ImageProcessor:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < img.shape[1] and 0 <= ny < img.shape[0]:
                     neighbors.append(img[ny, nx])
-        return neighbors
+        
+        # Фильтрация ненулевых соседей
+        nonzero_neighbors = [neighbor for neighbor in neighbors if not np.all(neighbor == 0)]
+        
+        if nonzero_neighbors:
+            print(f"Non-zero Neighbors: {nonzero_neighbors}")
+        else:
+            print("No non-zero neighbors found.")
+        
+        return nonzero_neighbors
+
     
     def four_channel_png_to_bgr(self):
         img = cv2.imread(self.output_png_image_path, cv2.IMREAD_UNCHANGED)
@@ -173,23 +226,140 @@ class ImageProcessor:
         image_shape[2] = temp
         return image_shape
     
-    def make_contour(self, four_channel_image, kernel_size=2, num_colors=4):
-        kernel = np.ones((kernel_size, kernel_size), np.uint8)
-        dilate_image = cv2.dilate(four_channel_image, kernel, iterations=1)
-        alpha_channel = dilate_image[:, :, 3]
-        contours, _ = cv2.findContours(alpha_channel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # def make_contour(self, four_channel_image, kernel_size=2, num_colors=4):
+    #     kernel = np.ones((kernel_size, kernel_size), np.uint8)
+    #     dilate_image = cv2.dilate(four_channel_image, kernel, iterations=1)
+    #     alpha_channel = dilate_image[:, :, 3]
+    #     contours, _ = cv2.findContours(alpha_channel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    #     image_with_contour = four_channel_image.copy()
+
+    #     for contour in contours:
+    #         color = (0, 0, 0, 255)  
+    #         most_sutable_colors = self.find_most_sutable_color(four_channel_image, contours, kenel_size = 2, num_colors = 7)
+    #         most_sutable_color = most_sutable_colors[6]
+    #         most_sutable_color_reshaped = self.reshape_image(most_sutable_color)
+    #         color = np.append(most_sutable_color_reshaped, 255)
+    #         cv2.drawContours(image_with_contour, [contour], -1, color, thickness=1)
+            
+    #     return image_with_contour
+    # def select_color(self, four_channel_image, contours):
+    #     color = (0, 0, 0, 255)  
+    #     most_sutable_colors = self.find_most_sutable_color(four_channel_image, contours, kenel_size = 2, num_colors = 7)
+    #     filtered_colors = []
+    #     for color in most_sutable_colors:
+    #         if not np.array_equal(color, [0, 0, 0]):
+    #             filtered_colors.append(color)
+    #     darkest_index = np.argmax(filtered_colors)
+    #     most_sutable_color = filtered_colors[darkest_index]
+    #     most_sutable_color = most_sutable_color * 0.9
+    #     most_sutable_color_reshaped = self.reshape_image(most_sutable_color)
+    #     print(most_sutable_colors)
+    #     color = np.append(most_sutable_color_reshaped, 255)
+    #     return color
+    
+    # def select_color(self, four_channel_image, contours):
+    #     color = (0, 0, 0, 255)  
+    #     most_sutable_colors = self.find_most_sutable_color(four_channel_image, contours, num_colors=7)
+    #     filtered_colors = []
+
+    #     for c in most_sutable_colors:
+    #         if not np.array_equal(c, [0, 0, 0]):
+    #             filtered_colors.append(c)
+    #     print(filtered_colors)
+    #     if filtered_colors:
+    #         darkest_index = np.argmin(filtered_colors)
+    #         most_sutable_color = filtered_colors[darkest_index]
+    #         most_sutable_color = most_sutable_color * 0.9
+    #         most_sutable_color_reshaped = self.reshape_image(most_sutable_color)
+    #         color = np.append(most_sutable_color_reshaped, 255)
+    #     print(color)
+    #     return color
+    
+    def select_color(self, four_channel_image, contours):
+        color = (0, 0, 0, 255)  
+        most_sutable_colors = self.find_most_sutable_color(four_channel_image, contours, num_colors=7)
+        filtered_colors = []
+
+        for c in most_sutable_colors:
+            if not np.array_equal(c, [0, 0, 0]):
+                filtered_colors.append(c)
+        print(filtered_colors)
+        if filtered_colors:
+            darkest_index = np.argmin(filtered_colors)
+            if darkest_index < len(filtered_colors):
+                most_sutable_color = filtered_colors[darkest_index]
+                most_sutable_color = most_sutable_color - most_sutable_color * 0.1
+                most_sutable_color = np.clip(most_sutable_color, 0, 255)
+                most_sutable_color_reshaped = self.reshape_image(most_sutable_color)
+                color = np.append(most_sutable_color_reshaped, 255)
+
+        print(f"Selected color: {color}")
+        return color
+
+    def make_contour(self, four_channel_image, kernel_size_to_dilate=1, kernel_size_to_smooth=5):
+        
+        
+        kernel_to_dilate = np.ones((kernel_size_to_dilate, kernel_size_to_dilate), np.uint8)
+        dilate_image = cv2.dilate(four_channel_image, kernel_to_dilate, iterations=1)
+        
+        smoothed_image = cv2.medianBlur(dilate_image, kernel_size_to_smooth) 
+        print(smoothed_image.shape)
+        bgr = smoothed_image[:, :, :3]
+        alpha_channel = smoothed_image[:, :, 3]
+
+        gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        gray_with_alpha = cv2.merge((gray, gray, gray, alpha_channel))
+
         image_with_contour = four_channel_image.copy()
 
-        for contour in contours:
-            color = (0, 0, 0, 255)  
-            most_sutable_colors = self.find_most_sutable_color(four_channel_image, contours, kenel_size = 2, num_colors = 7)
-            most_sutable_color = most_sutable_colors[6]
-            most_sutable_color_reshaped = self.reshape_image(most_sutable_color)
-            color = np.append(most_sutable_color_reshaped, 255)
-            cv2.drawContours(image_with_contour, [contour], -1, color, thickness=1)
-            
-        return image_with_contour
+        contours, _ = cv2.findContours(alpha_channel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        mask = np.zeros_like(gray_with_alpha[:, :, 0])
+        cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
+        image_with_contour[mask == 0] = [0, 0, 0, 0]
+        color = self.select_color(four_channel_image, contours)
 
+        cv2.drawContours(image_with_contour, contours, -1, color, thickness=1)
+
+        contour_without_image = np.zeros_like(image_with_contour)
+        cv2.drawContours(contour_without_image, contours, -1, color, thickness=1)
+
+        cv2.imwrite("/home/nikolay/aseprite/image_data/whale_second_process/image_with_contour_star_fish.png", image_with_contour)
+        cv2.imwrite("/home/nikolay/aseprite/image_data/whale_second_process/image_without_contour_7_star_fish.png", contour_without_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        return image_with_contour, contour_without_image
+
+    def find_mode(self, neighbors):
+        if len(neighbors) == 0:
+            return None
+        neighbors_array = np.array(neighbors)
+        mode_result = stats.mode(neighbors_array, axis=0)
+        mode_color = mode_result.mode[0]
+        count = mode_result.count[0]
+        if np.all(count > 1):
+            return mode_color.astype(int)
+        return None
+    
+    def replace_outliers_with_mode(self, img, count_of_neighbors = 8, threshold = 200):
+        flag = 0
+        output_img = img.copy()
+        rows, cols = img.shape[:2]
+        for y in range(1, rows - 1):
+            for x in range(1, cols - 1):
+                current_pixel = img[y, x][:3]
+                neighbors = [img[ny, nx][:3] for dy in range(-1, 2) for dx in range(-1, 2)
+                            if not (dx == 0 and dy == 0)
+                            for ny, nx in [(y + dy, x + dx)]
+                            if 0 <= nx < cols and 0 <= ny < rows]
+                for neighbor in neighbors:
+                    diff = np.mean(np.abs(neighbor - current_pixel), axis=0).sum()
+                    if diff > threshold:
+                        flag +=1
+                    if flag >= count_of_neighbors:
+                        mode_color = self.find_mode(neighbors)
+                        if mode_color is not None:
+                            output_img[y, x][:3] = mode_color 
+        return output_img
+        
+    
     def apply_KNN(self, img, x, y, k = 3):
         neighbors = []
         dx = dy = 1
