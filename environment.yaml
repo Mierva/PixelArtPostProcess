@@ -21,6 +21,7 @@ dependencies:
   - tzdata=2024a=h04d1e81_0
   - xz=5.4.6=h5eee18b_0
   - zlib=1.2.13=h5eee18b_0
+  - pip=23.3.1
   - pip:
     - cairocffi==1.6.1
     - cairosvg==2.7.1
