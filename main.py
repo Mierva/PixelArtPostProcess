@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import argparse
 import cv2
+import ast
 import os
     
     
@@ -18,7 +19,6 @@ def process_image_colors(input_img, output_image_path, palette_size=10,
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     else:
         rgb = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
-         
 
     palette = extract_colors(image=input_img, palette_size=palette_size, 
                              resize=False, 
@@ -39,9 +39,7 @@ def process_image_colors(input_img, output_image_path, palette_size=10,
     
     contours, _ = cv2.findContours(alpha_channel, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_with_contour = processed_bgr.copy()
-
-    color = tuple(map(int, palette_colors[np.argmin(np.sum(np.array(palette_colors), axis=1))]))
-    bgr_color = (int(color[2]), int(color[1]), int(color[0]))
+       
     darker_bgr_color = (179, 208, 234)
     cv2.drawContours(image_with_contour, contours, -1, darker_bgr_color, thickness=1)
     if input_image.shape[2] == 4:
@@ -65,8 +63,6 @@ def clear_tmp_imgs(folder, args, output_path_png):
     
     os.remove(args.input_img.replace('.svg', '.png'))    
     os.remove(output_path_png)  
-
-import ast
 
 def convert_threshold(data):
     if isinstance(data, str):
