@@ -28,9 +28,7 @@ def process_image_colors(input_img, output_image_path, palette_size=10,
     palette_colors = np.array([color.rgb for color in palette])
     
     indexes_for_drop.extend(np.where((palette_colors == [0, 0, 0]).all(axis=1))[0])
-    # indexes_for_drop.extend(np.where((palette_colors == [21, 13, 9]).all(axis=1))[0])
     palette_colors = np.delete(palette_colors, indexes_for_drop, axis=0)
-    print(palette_colors)
     
     palette_colors_reshaped = palette_colors.reshape((-1, 1, 1, 3))
     distances = np.sqrt(((rgb.reshape((1,) + rgb.shape) - palette_colors_reshaped) ** 2).sum(axis=-1))
